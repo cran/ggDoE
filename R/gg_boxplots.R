@@ -1,8 +1,8 @@
 #' Boxplots using ggplot2
 #'
 #' @param data provided dataset
-#' @param response A character string indicating the response of the data
-#' @param factor A character string indicating the factor of the data
+#' @param x A character string indicating the factor of the data
+#' @param y A character string indicating the response of the data
 #' @param group_var A character string indicating the groups for facet_wrap
 #' @param jitter_points Overlay jittered points to boxplots. Default is FALSE.
 #' @param horizontal Determine whether to change the orientation of the plot. Default is FALSE
@@ -18,13 +18,12 @@
 #' @examples
 #' data <- ToothGrowth
 #' data$dose <- factor(data$dose,levels = c(0.5, 1, 2),labels = c("D0.5", "D1", "D2"))
-#' gg_boxplots(data,response = "len",factor = "dose",alpha=0.6)
-#' gg_boxplots(data,response = "len",factor = "dose",group_var = "supp",
+#' gg_boxplots(data,y= "len",x= "dose",alpha=0.6)
+#' gg_boxplots(data,y = "len",x= "dose",group_var = "supp",
 #' alpha=0.6,color_palette = 'viridis',jitter_points=TRUE)
-#' @importFrom ggplot2 aes geom_boxplot guides stat_summary coord_flip
-#' @importFrom ggplot2  facet_wrap scale_color_manual geom_jitter position_jitterdodge
-#' @importFrom data.table data.table .SD
-gg_boxplots <- function(data,response,factor,
+#' @importFrom ggplot2 aes geom_boxplot guides stat_summary coord_flip sym
+#' @importFrom ggplot2 facet_wrap scale_color_manual geom_jitter position_jitterdodge
+gg_boxplots <- function(data,x,y,
                         group_var = NULL,
                         jitter_points = FALSE,
                         horizontal = FALSE,
@@ -34,13 +33,8 @@ gg_boxplots <- function(data,response,factor,
                         direction=1,
                         show_mean=FALSE){
 
-  dat <- data.table(data)
-
-  select_columns <- function(DT,cols){
-    return(DT[,.SD, .SDcols = cols])
-  }
-
-  factor_vec <- select_columns(dat,factor)
+  dat <- data.frame(data)
+  factor_vec <- dat[, x, drop = FALSE]
 
   if(!is.na(color_palette)){
 
@@ -54,8 +48,7 @@ gg_boxplots <- function(data,response,factor,
 
     factor_levels$colors <- color_choice
   }
-  p <- ggplot(dat, aes_string(x=factor,y=response,
-                              color = factor)) +
+  p <- ggplot(dat, aes(x=!!sym(x),y=!!sym(y),color = !!sym(x))) +
     geom_boxplot(alpha = alpha,
                  outlier.shape = NA) +
     {if(jitter_points)geom_jitter(alpha=0.4,size=3,
@@ -70,8 +63,7 @@ gg_boxplots <- function(data,response,factor,
     return(p)
   }
   else{
-    dat[, group_var := group_var]
+    dat[,group_var] <- factor(dat[,group_var])
     return(p+ facet_wrap(group_var))
   }
 }
-

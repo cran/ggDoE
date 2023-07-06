@@ -8,6 +8,7 @@ pareto_plot(
   model,
   alpha = 0.05,
   method = "Lenth",
+  effect_colors = c("#F8766D", "#00BFC4"),
   margin_errors = TRUE,
   showplot = TRUE
 )
@@ -18,6 +19,8 @@ pareto_plot(
 \item{alpha}{specify the significance level to compute margin of errors. Numeric significance level, between 0 and 1. Default is alpha=0.05}
 
 \item{method}{Character value. Method to calculate PSE. Default is Lenth. Options include: Zahn, WZahn, Lenth, RMS, Dong, JuanPena, Daniel. See Details.}
+
+\item{effect_colors}{Change colors of effects. Default are ('#F8766D','#00BFC4') for negative and positive effects, respectively.}
 
 \item{margin_errors}{Default is TRUE, if false the cutoffs for margin of errors (ME) and simultaneous margin of error (SME) are not shown}
 
@@ -57,7 +60,6 @@ with weights decreasing linearly from m - .5 to .5, but bounded above by .65m}
 m1 <- lm(lns2 ~ (A+B+C+D)^4,data=original_epitaxial)
 pareto_plot(m1)
 pareto_plot(m1,method='Zahn',alpha=0.1)
-pareto_plot(m1,margin_errors=FALSE)
 }
 \references{
 Daniel, C (1959) Use of Half-Normal Plots in Interpreting Factorial Two-Level Experiments. Technometrics, 1(4), 311-341 \cr \cr

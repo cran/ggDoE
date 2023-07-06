@@ -9,7 +9,7 @@
 #' @param point_color Change color of points in plot
 #' @param showplot Default is TRUE, if FALSE plot will not be shown and a tibble is returned used to create the plot along with the calculated PSE,ME,SME
 #' @return A tibble with the absolute effects and half-normal quantiles. A ggplot2 version of halfnormal plot for factorial effects is returned
-#' @importFrom ggplot2 ggplot aes geom_point labs geom_vline annotate geom_abline
+#' @importFrom ggplot2 ggplot aes sym geom_point labs geom_vline annotate geom_abline
 #' @importFrom stats qnorm coef
 #' @importFrom utils tail
 #' @export
@@ -52,9 +52,9 @@
 
 #' Zahn, D (1975) Modifications of and Revised Critical Values for the Half-Normal Plot. Technometrics 17(2), 189-200
 
-#' @examples model <- lm(ybar ~ (A+B+C+D)^4,data=adapted_epitaxial)
+#' @examples
+#' model <- lm(ybar ~ (A+B+C+D)^4,data=adapted_epitaxial)
 #' half_normal(model)
-#' half_normal(model,alpha=0.1,label_active=TRUE,margin_errors=TRUE)
 #' half_normal(model,method='Zahn',alpha=0.1,ref_line=TRUE,
 #'             label_active=TRUE,margin_errors=TRUE)
 half_normal <- function(model,method='Lenth',
@@ -64,8 +64,8 @@ half_normal <- function(model,method='Lenth',
                         margin_errors = FALSE,
                         point_color="#21908CFF",
                         showplot=TRUE){
-  if (!inherits(model, "lm")) {
-    stop("model should be of class lm or glm")
+  if(!insight::is_regression_model(model)){
+    stop("model should be a regression model of class 'lm'")
   }else{
     insight::check_if_installed(c('unrepx','ggrepel'))
 
@@ -80,7 +80,7 @@ half_normal <- function(model,method='Lenth',
     names <- names(effs)
     m <- length(estimates)
     r <- c(1:m)
-    zscore <- c(rep(0,m))
+    zscore <- rep(0,m)
 
     for (i in 1:m) {
       zscore[i] <- qnorm( ( ( r[i]-.5)/m+1)/2 )
@@ -93,18 +93,20 @@ half_normal <- function(model,method='Lenth',
                           "absolute_effects"=effs,
                           "half_normal_quantiles"=zscore)
 
-    if(showplot){
-      base_plot <- ggplot(dat,aes_string(x= 'absolute_effects',
-                                         y = 'half_normal_quantiles',
-                                         label='effects')) +
+    if(!showplot){
+      return(dat)
+    }
+    else{
+      base_plot <- ggplot(dat,aes(x= !!sym("absolute_effects"),
+                                  y = !!sym("half_normal_quantiles"),
+                                  label=!!sym("effects"))) +
         geom_point(color = point_color, size = 2.5)+
         ggrepel::geom_text_repel(data = dat,
                                  max.overlaps = 20,
                                  min.segment.length = Inf,
                                  nudge_y = 0.001*max(dat$half_normal_quantiles),
                                  nudge_x = 0.001*max(dat$absolute_effects),
-                                 na.rm = TRUE
-        )+
+                                 na.rm = TRUE) +
         theme_bw_nogrid()+
         labs(x="absolute effects",y="half-normal quantiles")
 
@@ -138,9 +140,6 @@ half_normal <- function(model,method='Lenth',
         plt <- base_plot + geom_abline(intercept=0,slope = 1/PSE,linetype=2)
       }
       return(plt)
-    }
-    else{
-      return(dat)
     }
   }
 }

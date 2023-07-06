@@ -11,47 +11,48 @@
 #' @return interaction effects plot between two factors
 #' @export
 #'
-#' @importFrom ggplot2 aes_string geom_line geom_point theme labs element_rect scale_linetype_manual
+#' @importFrom ggplot2 aes geom_line geom_point theme labs element_rect scale_linetype_manual sym
 #' @importFrom ggplot2 scale_color_manual theme_bw ylim element_blank
 #' @importFrom utils combn
-#' @importFrom data.table data.table .SD
+#' @importFrom stats aggregate
 #' @examples
 #' interaction_effects(adapted_epitaxial,response = 'ybar',exclude_vars = c('s2','lns2'))
 interaction_effects <- function(design,response,
-                                 exclude_vars=c(),
+                                 exclude_vars = c(),
                                  linetypes = c('solid','dashed'),
                                  colors = c("#4260c9" ,"#d6443c"),
-                                 n_columns=2,
-                                 showplot=TRUE){
-  insight::check_if_installed('gridExtra')
+                                 n_columns = 2,
+                                 showplot = TRUE){
+  insight::check_if_installed('patchwork')
 
-  design <- data.table(design)
+  if(length(colors) != 2 & !inherits(colors,'character') ){
+    stop('colors must a character vector of length 2')
+  }
+  if(length(linetypes) != 2 & !inherits(linetypes,'character') ){
+    stop('linetypes must a character vector of length 2')
+  }
+
   factor_names <- setdiff(names(design),c(response,exclude_vars))
+  design[,factor_names] <- lapply(design[,factor_names], as.factor)
 
-  group_mean <- function(DT, response_var, group_by){
-    return(DT[,.(mean_response=mean(.SD[[1]])),
-              by= group_by, .SDcols = response_var
-    ])
-  }
-  convert_to_factors <- function(DT, cols) {
-    return(DT[,(cols) := lapply(.SD, 'as.factor'), .SDcols = cols])
-  }
   interactions <- t(combn(factor_names,2))
   n_iteractions <- nrow(interactions)
-
   dat_list <- vector('list',length = n_iteractions)
-  convert_to_factors(design,cols = factor_names)
 
   for (i in 1:n_iteractions) {
-    dat_list[[i]] <- group_mean(DT=design,
-                                group_by = c(interactions[i,1],
-                                             interactions[i,2]),
-                                response_var=response )
+    dat_list[[i]] <- aggregate(design[response],
+                               by = list(design[[interactions[i,1]]],
+                                         design[[interactions[i,2]]]),
+                               FUN = mean)
+    colnames(dat_list[[i]]) <- c(interactions[i,1],interactions[i,2],
+                                 'mean_response')
   }
 
-  if(showplot){
+  if(!showplot){
+    return(dat_list)
+  }
+  else{
     vals <- c()
-
     for(i in 1:n_iteractions){
       vals <- c(vals,dat_list[[i]][[3]])
     }
@@ -60,24 +61,19 @@ interaction_effects <- function(design,response,
     maxval <- max(vals)
 
     plot_list <- vector('list',length = n_iteractions)
-
     for(i in 1:n_iteractions){
       plot_list[[i]] <- ggplot(dat_list[[i]],
-                               aes_string(x = interactions[i,1],
-                                          y = 'mean_response',
-                                          group=interactions[i,2],
-                                          colour=interactions[i,2],
-                                          shape=interactions[i,2],
-                                          linetype=interactions[i,2]))+
+                               aes(x = !!sym(interactions[i,1]),
+                                   y = !!sym('mean_response'),
+                                   group=!!sym(interactions[i,2]),
+                                   colour=!!sym(interactions[i,2]),
+                                   shape=!!sym(interactions[i,2]),
+                                   linetype=!!sym(interactions[i,2])))+
         geom_line()+
         geom_point()+
         scale_linetype_manual(values=linetypes)+
         scale_color_manual(values=colors)+
-        theme_bw()+
         ylim(minval,maxval)+
-        theme(legend.background = element_rect(fill="gray96"),
-              panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank())+
         labs(y=paste0("Mean of ",response),
              x= interactions[i,1],
              colour=interactions[i,2],
@@ -85,13 +81,13 @@ interaction_effects <- function(design,response,
              shape=interactions[i,2]
         )
     }
-    return(gridExtra::grid.arrange(grobs=plot_list,
-                                   ncol=n_columns))
-  }
-  else{
-    return(dat_list)
+    final_plot <- patchwork::wrap_plots(plot_list,ncol = n_columns) &
+      theme_bw() &
+      theme(legend.background = element_rect(fill="gray96"),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank())
+    return(final_plot)
   }
 }
-
 
 

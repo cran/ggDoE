@@ -13,8 +13,7 @@
 #'
 #' @importFrom stats lm as.formula
 #' @importFrom utils stack
-#' @importFrom data.table data.table first last
-#' @importFrom ggplot2 aes_string scale_color_manual theme_bw element_blank labs
+#' @importFrom ggplot2 aes scale_color_manual theme_bw element_blank labs
 #' @examples
 #' mod <- lm(s2 ~ (A+B+C)^2,data=original_epitaxial)
 #' lambda_plot(mod)
@@ -25,14 +24,16 @@ lambda_plot <- function(model, lambda = seq(-2, 2, by = 0.1),
                         alpha=1,
                         direction =1,
                         showplot=TRUE){
+  if(!insight::is_regression_model(model)){
+    stop("model should be a regression model of class 'lm'")
+  }
   insight::check_if_installed('ggrepel')
 
   y <- model$model[, 1]
   response <- model$terms[[2]]
   variables <- attr(model$terms,'term.labels')
 
-  var_formula <- paste(variables,
-                       collapse = '+')
+  var_formula <- paste(variables,collapse = '+')
   data_name <- model$call[[3]]
 
   org_fit <- lm(as.formula(paste(response,"~",var_formula)), qr = TRUE,
@@ -75,17 +76,17 @@ lambda_plot <- function(model, lambda = seq(-2, 2, by = 0.1),
 
     factors_total <- ncol(t_lambda)
 
-    melted_t <- data.table(cbind('lambda'=rep(lambda,factors_total),
-                      stack(as.vector(t_lambda_dat[,-1]))))
+    melted_t <- data.frame(cbind('lambda'=rep(lambda,factors_total),
+                                 stack(as.vector(t_lambda_dat[,-1]))))
 
     pattern <- "/|:|\\?|<|>|\\|\\\\|\\*"
     int_terms <- variables[grepl(pattern,variables)]
 
-    label_left <- melted_t[lambda == first(lambda)]
-    label_left_main <- label_left[!ind %in% int_terms]
+    label_left <- melted_t[lambda == lambda[1],]
+    label_left_main <- label_left[!label_left$ind %in% int_terms,]
 
-    label_right <- melted_t[lambda == last(lambda)]
-    label_right_interactions <- label_right[ind %in% int_terms]
+    label_right <- melted_t[lambda == lambda[length(lambda)],]
+    label_right_interactions <- label_right[label_right$ind %in% int_terms,]
 
     if(is.na(color_palette)){
       factor_colors <- rep("#21908CFF",factors_total)
@@ -96,9 +97,9 @@ lambda_plot <- function(model, lambda = seq(-2, 2, by = 0.1),
                                       alpha = alpha)
     }
 
-    plt <- ggplot(melted_t, aes_string(x='lambda', y="values",
-                                       colour="ind",
-                                       group="ind"))+
+    plt <- ggplot(melted_t, aes(x=!!sym('lambda'), y=!!sym("values"),
+                                colour=!!sym("ind"),
+                                group=!!sym("ind")))+
       geom_line()+
       ggrepel::geom_label_repel(data = label_left_main,aes(label=ind),
                                 max.overlaps = 15)+
