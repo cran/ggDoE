@@ -1,10 +1,10 @@
 
-# ggDoE <a href='https://ggdoe.netlify.app'><img src='man/figures/logo.png' align="right" height="139" /></a>
+# ggDoE <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/ggDoE)](https://cran.r-project.org/package=ggDoE)
-[![R-CMD-check](https://github.com/toledo60/ggDoE/workflows/R-CMD-check/badge.svg)](https://github.com/toledo60/ggDoE/actions)
 [![Documentation](https://img.shields.io/badge/Documentation-ggDoE-blue)](https://ggdoe.netlify.app/)
+[![R-CMD-check](https://github.com/toledo60/ggDoE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/toledo60/ggDoE/actions/workflows/R-CMD-check.yaml)
 
 ## Installation
 
@@ -19,8 +19,8 @@ install.packages('ggDoE')
 - the development version from GitHub with
 
 ``` r
-if (!require("remotes")) install.packages("remotes")
-remotes::install_github("toledo60/ggDoE")
+if (!require("pak")) install.packages("pak")
+pak::pak("toledo60/ggDoE")
 ```
 
 ## Overview
@@ -78,25 +78,20 @@ context, run the following code in your `R` console
 citation('ggDoE')
 ```
 
-    Warning in citation("ggDoE"): no date field in DESCRIPTION file of package
-    'ggDoE'
-
     Warning in citation("ggDoE"): could not determine year for 'ggDoE' from package
     DESCRIPTION file
-
 
     To cite package 'ggDoE' in publications use:
 
       Toledo Luna J (????). _ggDoE: Modern Graphs for Design of Experiments
-      with 'ggplot2'_. R package version 0.7.9,
-      <https://ggdoe.netlify.app>.
+      with 'ggplot2'_. R package version 0.8, <https://ggdoe.netlify.app>.
 
     A BibTeX entry for LaTeX users is
 
       @Manual{,
         title = {ggDoE: Modern Graphs for Design of Experiments with 'ggplot2'},
         author = {Jose {Toledo Luna}},
-        note = {R package version 0.7.9},
+        note = {R package version 0.8},
         url = {https://ggdoe.netlify.app},
       }
 
@@ -228,14 +223,6 @@ Main effect plots for each factor in a *factorial design*
 ``` r
 main_effects(original_epitaxial,
              response='s2',
-             exclude_vars = c('ybar','lns2'))
-```
-
-![](man/figures/main_effects1.png)
-
-``` r
-main_effects(original_epitaxial,
-             response='s2',
              exclude_vars = c('A','ybar','lns2'),
              color_palette = 'viridis',
              n_columns=3)
@@ -259,14 +246,6 @@ gg_rsm(heli.rsm,formula = ~x1+x2+x3+x4,
 ```
 
 ![](man/figures/contour1.png)
-
-``` r
-gg_rsm(heli.rsm,formula = ~x1+x2+x3+x4,
-       at = rsm::xs(heli.rsm),
-       filled = TRUE)
-```
-
-![](man/figures/contour2.png)
 
 ### Pareto Plot
 
@@ -297,4 +276,4 @@ X <- lhs::randomLHS(n=10, k=4)
 pair_plots(X,n_columns=3,grid = TRUE)
 ```
 
-![](man/figures/twoD_projections.png)
+![](man/figures/pair_plots.png)

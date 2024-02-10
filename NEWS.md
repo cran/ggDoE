@@ -1,3 +1,31 @@
+# ggDoE 0.8
+
+BREAKING
+
+* `gg_rsm()` arguments `filled, size, stroke` have been removed. They were used for `metR::geom_text_contour` which is no longer being used.
+
+* `pair_plots` no longer checks `design` is a proper Latin hypercube design
+
+
+NEW FEATURES
+
+* `gg_rsm()` has new argument `bins` to specify the number of contour bins. Default is 6
+* `gg_rsm()` has new argument `text_size` to specify size of text for labelled contour lines. Default is 3
+* Added new function `design_to_tibble()` to convert an object of class `design` to `tibble`. Designs generated from packages such as `DoE.base, FrF2`
+
+
+BUG FIXES
+
+* `main_effects` now has independent x-axis limits for each factor. Input `design` properly accepts class "design" generated from packages such as `DoE.base, FrF2`, same goes for `interaction_effects`
+* `n_columns` arguments is automatically adjusted to `n_columns=1` in `main_effects`,`interaction_effects`, `pair_plots` whenever there is only one factor or pair of factors
+
+
+DEPENDENCIES
+
+* switched `metR` to `geomtextpath`. `geomtextpath` is a lighter package in terms of dependencies compared to `metR`. This only affects `gg_rsm` and is used to add text labels on contour lines
+
+---
+
 # ggDoE 0.7.9
 
 BREAKING
@@ -13,7 +41,7 @@ NEW FEATURES
 
 * Added `pulp_experiment` data from *"Experiments:  Planning, Analysis, and Optimization, CFJ Wu, MS Hamada - Second edition"*
 * Added `girder_experimet` data from *"Experiments:  Planning, Analysis, and Optimization, CFJ Wu, MS Hamada - Second edition"*
-* Added new argument `effect_colors` to `pareto_plot()`. Default are `c('#d9a698','#9ecede')` for positive and negative efffects, respectively.
+* Added new argument `effect_colors` to `pareto_plot()`. Default are `c('#d9a698','#9ecede')` for positive and negative effects, respectively.
 
 
 DEPENDENCIES
@@ -152,7 +180,7 @@ CURRENT FUNCTIONS
 
 * `half_normal()` A  halfnormal plot for factorial effects
 
-* `lambda_plot()` Lambda plot for tracing t-staitics across different values of lambda
+* `lambda_plot()` Lambda plot for tracing t-statistics across different values of lambda
 
 * `main_effects()` Main effects plots for each factor in a design given a specified response
 

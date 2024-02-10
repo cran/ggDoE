@@ -1,7 +1,7 @@
 Package: ggDoE
 Type: Package
 Title: Modern Graphs for Design of Experiments with 'ggplot2'
-Version: 0.7.9
+Version: 0.8
 Authors@R: c(person(given = "Jose",family = "Toledo Luna",
              role = c("aut", "cre"),
              email = "toledo60@protonmail.com",
@@ -16,14 +16,14 @@ Encoding: UTF-8
 LazyData: true
 URL: https://ggdoe.netlify.app
 BugReports: https://github.com/toledo60/ggDoE/issues
-Imports: ggplot2 (>= 3.4.0), insight
-Suggests: knitr, rmarkdown, roxygen2, tibble, MASS, viridisLite,
-        ggrepel, patchwork, unrepx, metR, rsm, lhs
-RoxygenNote: 7.2.3
-Depends: R (>= 3.6.0)
+Imports: ggplot2 (>= 3.4.0), insight (>= 0.19.5)
+Suggests: roxygen2, tibble, MASS, viridisLite, ggrepel, patchwork,
+        unrepx, geomtextpath, rsm, lhs, DoE.base
+RoxygenNote: 7.3.1
+Depends: R (>= 3.7.0)
 Language: en-US
 NeedsCompilation: no
-Packaged: 2023-07-06 20:03:00 UTC; toledo60
+Packaged: 2024-02-10 01:28:29 UTC; jtoledo
 Author: Jose Toledo Luna [aut, cre] (<https://orcid.org/0000-0001-8559-0027>)
 Repository: CRAN
-Date/Publication: 2023-07-06 20:20:02 UTC
+Date/Publication: 2024-02-10 04:50:02 UTC
